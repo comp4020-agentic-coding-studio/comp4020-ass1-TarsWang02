@@ -56,9 +56,14 @@ export function maxRadius(R: number, r: number): number {
   return R + 2 * r;
 }
 
-// Full rotations the rolling gear makes relative to the fixed frame over one
-// lap around the ring — the coin rotation paradox falls straight out of this:
-// rotationCount(r, r) = 2, not 1, for two identical coins.
-export function rotationCount(R: number, r: number): number {
-  return (R + r) / r;
+// Full rotations the rolling gear makes relative to the fixed frame over the
+// whole time it takes the curve to close (lapCount(R, r) laps around the
+// ring) -- always a whole number, since gcd(R, r) divides R + r exactly.
+// The coin rotation paradox falls straight out of this: totalRotations(r, r)
+// = 2, not 1, for two identical coins. (Rotations per single ring-lap,
+// (R + r) / r, is *not* generally a whole number once the curve takes more
+// than one lap to close -- e.g. R=24, r=7 gives 31/7 -- so this is the
+// version fit to display.)
+export function totalRotations(R: number, r: number): number {
+  return (R + r) / gcd(R, r);
 }

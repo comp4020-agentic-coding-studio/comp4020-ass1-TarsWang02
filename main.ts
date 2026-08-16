@@ -4,7 +4,7 @@ import {
   lapCount,
   maxRadius,
   rollingCenter,
-  rotationCount,
+  totalRotations,
   totalTheta,
 } from "./epicycloid";
 import { ParticleField } from "./particles";
@@ -24,33 +24,73 @@ const SAMPLES_PER_LAP_MAX = 500;
 
 const MAX_DT = 1 / 30; // clamp so a backgrounded tab doesn't teleport the sim
 
-const CURVE_COLOR = "#0b5fff";
-const RING_COLOR = "#c7c7c7";
-const GEAR_COLOR = "#e8590c";
-const BG_FILL = "rgba(255, 255, 255, 0.06)";
+const BG = "#05070c";
+const CURVE_COLOR = "#22e0ff";
+const RING_COLOR = "#2a3446";
+const GEAR_COLOR = "#ff8a3d";
+const GEAR_GLOW = "rgba(255, 138, 61, 0.85)";
+const BG_FILL = "rgba(5, 7, 12, 0.08)";
 const PARTICLE_SIZE = 1.6;
 
 const canvas = document.querySelector<HTMLCanvasElement>("#curve");
 const toothCountEl = document.querySelector<HTMLElement>("#tooth-count");
 const cuspCountEl = document.querySelector<HTMLElement>("#cusp-count");
+const heroStatEl = document.querySelector<HTMLElement>("#hero-stat");
 const lapCountEl = document.querySelector<HTMLElement>("#lap-count");
 const lapUnitEl = document.querySelector<HTMLElement>("#lap-unit");
 const rotationCountEl = document.querySelector<HTMLElement>("#rotation-count");
+const rotationCountStatEl = document.querySelector<HTMLElement>("#rotation-count-stat");
+const thetaReadoutEl = document.querySelector<HTMLElement>("#theta-readout");
 const teethSlider = document.querySelector<HTMLInputElement>("#teeth");
+const chips = document.querySelectorAll<HTMLButtonElement>(".chip");
 
 if (
   canvas &&
   toothCountEl &&
   cuspCountEl &&
+  heroStatEl &&
   lapCountEl &&
   lapUnitEl &&
   rotationCountEl &&
+  rotationCountStatEl &&
+  thetaReadoutEl &&
   teethSlider
 ) {
   const ctx = canvas.getContext("2d");
   if (ctx) {
-    init(canvas, ctx, toothCountEl, cuspCountEl, lapCountEl, lapUnitEl, rotationCountEl, teethSlider);
+    init(
+      canvas,
+      ctx,
+      toothCountEl,
+      cuspCountEl,
+      heroStatEl,
+      lapCountEl,
+      lapUnitEl,
+      rotationCountEl,
+      rotationCountStatEl,
+      thetaReadoutEl,
+      teethSlider,
+    );
   }
+}
+
+setupScrollReveal();
+
+function setupScrollReveal(): void {
+  const targets = document.querySelectorAll<HTMLElement>(".reveal");
+  if (targets.length === 0) return;
+  const observer = new IntersectionObserver(
+    (entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("in-view");
+          observer.unobserve(entry.target);
+        }
+      }
+    },
+    { threshold: 0.15 },
+  );
+  for (const target of targets) observer.observe(target);
 }
 
 function samplesPerLap(): number {
@@ -64,13 +104,17 @@ function init(
   ctx: CanvasRenderingContext2D,
   toothCountEl: HTMLElement,
   cuspCountEl: HTMLElement,
+  heroStatEl: HTMLElement,
   lapCountEl: HTMLElement,
   lapUnitEl: HTMLElement,
   rotationCountEl: HTMLElement,
+  rotationCountStatEl: HTMLElement,
+  thetaReadoutEl: HTMLElement,
   teethSlider: HTMLInputElement,
 ): void {
   const R = RING_TEETH;
   let r = START_ROLLING_TEETH;
+  let lastCusps = -1;
   const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   const angularVelocity = (2 * Math.PI) / SECONDS_PER_LAP; // one ring-lap per SECONDS_PER_LAP, always
 
@@ -79,13 +123,37 @@ function init(
   let theta = 0;
   let nextSampleTheta = 0;
 
+  function updateSliderFill(): void {
+    const min = Number(teethSlider.min);
+    const max = Number(teethSlider.max);
+    const pct = ((r - min) / (max - min)) * 100;
+    teethSlider.style.setProperty("--fill", `${pct}%`);
+  }
+
   function updateReadouts(): void {
     const laps = lapCount(R, r);
+    const cusps = cuspCount(R, r);
+    const rotations = totalRotations(R, r);
     toothCountEl.textContent = String(r);
-    cuspCountEl.textContent = String(cuspCount(R, r));
+    cuspCountEl.textContent = String(cusps);
     lapCountEl.textContent = String(laps);
     lapUnitEl.textContent = laps === 1 ? "lap" : "laps";
-    rotationCountEl.textContent = String(rotationCount(R, r));
+    rotationCountEl.textContent = String(rotations);
+    rotationCountStatEl.textContent = String(rotations);
+
+    if (lastCusps !== -1 && lastCusps !== cusps) {
+      heroStatEl.classList.remove("pulse");
+      // force reflow so the animation can restart on repeated changes
+      void heroStatEl.offsetWidth;
+      heroStatEl.classList.add("pulse");
+    }
+    lastCusps = cusps;
+
+    for (const chip of chips) {
+      chip.setAttribute("aria-pressed", String(Number(chip.dataset.teeth) === r));
+    }
+
+    updateSliderFill();
   }
 
   function toCanvas(x: number, y: number, scale: number): [number, number] {
@@ -110,6 +178,9 @@ function init(
   }
 
   function drawGear(scale: number, atTheta: number): void {
+    ctx.shadowBlur = 8;
+    ctx.shadowColor = GEAR_GLOW;
+
     const c = rollingCenter(R, r, atTheta);
     const [cx, cy] = toCanvas(c.x, c.y, scale);
     ctx.beginPath();
@@ -139,6 +210,8 @@ function init(
     ctx.arc(px, py, 2.2, 0, 2 * Math.PI);
     ctx.fillStyle = GEAR_COLOR;
     ctx.fill();
+
+    ctx.shadowBlur = 0;
   }
 
   // Rebuilds particle storage for the current (R, r) and viewport. Called on
@@ -161,7 +234,7 @@ function init(
     canvas.width = cssSize * dpr;
     canvas.height = cssSize * dpr;
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = BG;
     ctx.fillRect(0, 0, cssSize, cssSize);
     retarget();
   }
@@ -171,7 +244,7 @@ function init(
   function drawComplete(): void {
     const scale = cssSize / 2 / maxRadius(R, r);
     const end = totalTheta(R, r);
-    ctx.fillStyle = "#ffffff";
+    ctx.fillStyle = BG;
     ctx.fillRect(0, 0, cssSize, cssSize);
     for (let i = 0; i < field.capacity; i++) {
       const t = end * (i / field.capacity);
@@ -183,6 +256,7 @@ function init(
     ctx.fillStyle = CURVE_COLOR;
     field.draw(ctx, PARTICLE_SIZE * 1.2);
     drawGear(scale, end);
+    thetaReadoutEl.textContent = ((end * 180) / Math.PI).toFixed(1);
   }
 
   function frame(now: number, last: number): void {
@@ -210,6 +284,7 @@ function init(
     ctx.fillStyle = CURVE_COLOR;
     field.draw(ctx, PARTICLE_SIZE);
     drawGear(scale, theta);
+    thetaReadoutEl.textContent = ((theta * 180) / Math.PI).toFixed(1);
 
     requestAnimationFrame((t) => frame(t, now));
   }
@@ -219,6 +294,15 @@ function init(
     retarget();
     if (reduceMotion) drawComplete();
   });
+
+  for (const chip of chips) {
+    chip.addEventListener("click", () => {
+      const value = chip.dataset.teeth;
+      if (!value) return;
+      teethSlider.value = value;
+      teethSlider.dispatchEvent(new Event("input", { bubbles: true }));
+    });
+  }
 
   window.addEventListener("resize", () => {
     resize();

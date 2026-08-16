@@ -6,7 +6,7 @@ import {
   lapCount,
   maxRadius,
   rollingCenter,
-  rotationCount,
+  totalRotations,
   totalTheta,
 } from "../epicycloid";
 
@@ -50,12 +50,20 @@ describe("gcd", () => {
 
 describe("the coin rotation paradox", () => {
   it("two identical coins: the rolling coin turns twice, not once", () => {
-    expect(rotationCount(12, 12)).toBe(2);
+    expect(totalRotations(12, 12)).toBe(2);
   });
 
-  it("a small gear on a big ring turns more per lap the smaller it is", () => {
-    expect(rotationCount(24, 8)).toBe(4);
-    expect(rotationCount(24, 6)).toBe(5);
+  it("a small gear on a big ring turns more, by the time it closes, the smaller it is", () => {
+    expect(totalRotations(24, 8)).toBe(4);
+    expect(totalRotations(24, 6)).toBe(5);
+  });
+
+  it("is always a whole number, even when the curve takes several laps to close", () => {
+    // R=24, r=7 closes in 7 laps; (R+r)/r itself (31/7) is not a whole
+    // number, which is exactly the bug this function exists to avoid
+    // displaying: totalRotations divides by gcd(R, r), not r.
+    expect(totalRotations(24, 7)).toBe(31);
+    expect(totalRotations(24, 23)).toBe(47);
   });
 });
 
