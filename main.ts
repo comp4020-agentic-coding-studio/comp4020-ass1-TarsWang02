@@ -7,11 +7,13 @@ const canvas = document.querySelector<HTMLCanvasElement>("#curve");
 const toothCountEl = document.querySelector<HTMLElement>("#tooth-count");
 const cuspCountEl = document.querySelector<HTMLElement>("#cusp-count");
 const lapCountEl = document.querySelector<HTMLElement>("#lap-count");
+const lapUnitEl = document.querySelector<HTMLElement>("#lap-unit");
+const teethSlider = document.querySelector<HTMLInputElement>("#teeth");
 
-if (canvas && toothCountEl && cuspCountEl && lapCountEl) {
+if (canvas && toothCountEl && cuspCountEl && lapCountEl && lapUnitEl && teethSlider) {
   const ctx = canvas.getContext("2d");
   if (ctx) {
-    init(canvas, ctx, toothCountEl, cuspCountEl, lapCountEl);
+    init(canvas, ctx, toothCountEl, cuspCountEl, lapCountEl, lapUnitEl, teethSlider);
   }
 }
 
@@ -21,9 +23,11 @@ function init(
   toothCountEl: HTMLElement,
   cuspCountEl: HTMLElement,
   lapCountEl: HTMLElement,
+  lapUnitEl: HTMLElement,
+  teethSlider: HTMLInputElement,
 ): void {
-  const r = START_ROLLING_TEETH;
   const R = RING_TEETH;
+  let r = START_ROLLING_TEETH;
 
   function resize(): void {
     const cssSize = canvas.clientWidth || canvas.parentElement?.clientWidth || 320;
@@ -65,10 +69,21 @@ function init(
     ctx.lineWidth = 2;
     ctx.stroke();
 
+    const laps = lapCount(R, r);
     toothCountEl.textContent = String(r);
     cuspCountEl.textContent = String(cuspCount(R, r));
-    lapCountEl.textContent = String(lapCount(R, r));
+    lapCountEl.textContent = String(laps);
+    lapUnitEl.textContent = laps === 1 ? "lap" : "laps";
   }
+
+  function redrawAtCurrentSize(): void {
+    draw(canvas.clientWidth || canvas.parentElement?.clientWidth || 320);
+  }
+
+  teethSlider.addEventListener("input", () => {
+    r = Number(teethSlider.value);
+    redrawAtCurrentSize();
+  });
 
   window.addEventListener("resize", resize);
   resize();

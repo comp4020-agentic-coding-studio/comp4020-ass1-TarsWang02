@@ -25,9 +25,14 @@
         <figcaption class="readouts">
           <span><strong id="tooth-count">8</strong> teeth on the rolling gear</span>
           <span><strong id="cusp-count">3</strong> cusps</span>
-          <span>closes in <strong id="lap-count">1</strong> lap</span>
+          <span>closes in <strong id="lap-count">1</strong> <span id="lap-unit">lap</span></span>
         </figcaption>
       </figure>
+
+      <div class="controls">
+        <label for="teeth">Rolling gear teeth (against a fixed 24-tooth ring)</label>
+        <input type="range" id="teeth" min="1" max="24" step="1" value="8" />
+      </div>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>
