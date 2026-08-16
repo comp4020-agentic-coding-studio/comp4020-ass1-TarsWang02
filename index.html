@@ -17,9 +17,9 @@
         <span class="kicker">01 · INTRO</span>
         <h1>Rolling</h1>
         <p class="intro">
-          One small gear rolls around a fixed ring. A pen point on its rim traces a curve as it
-          goes. Nothing else is happening here — and one number is enough to turn a 3-petal figure
-          into a 24-cusp web.
+          One small gear rolls around a fixed ring. A pen point on its rim
+          traces a curve as it goes. Nothing else is happening here — and one
+          number is enough to turn a 3-petal figure into a 24-cusp web.
         </p>
         <a class="scroll-cue" href="#interactive">
           <span>Try it</span>
@@ -32,36 +32,71 @@
         <h2>Turn the gear</h2>
 
         <div class="canvas-wrap">
-          <canvas id="curve" aria-label="A curve traced by a small gear rolling around a fixed ring, drawn as an epicycloid. Click and drag the gear to turn it, or use the slider below."></canvas>
-          <span class="hud-angle" aria-hidden="true">&theta; <span id="theta-readout">0.0</span>&deg;</span>
-        </div>
+          <canvas
+            id="curve"
+            aria-label="A curve traced by a small gear rolling around a fixed ring, drawn as an epicycloid."
+          ></canvas>
+          <span class="hud-angle" aria-hidden="true"
+            >&theta; <span id="theta-readout">0.0</span>&deg;</span
+          >
 
-        <div class="hero-stat" id="hero-stat">
-          <span class="value" id="cusp-count">3</span>
-          <span class="label">cusps</span>
-        </div>
-        <div class="stat-row">
-          <span><strong id="tooth-count">8</strong> teeth</span>
-          <span>closes in <strong id="lap-count">1</strong> <span id="lap-unit">lap</span></span>
-          <span><strong id="rotation-count-stat">4</strong> spins to close</span>
-        </div>
+          <div class="ring-hud" id="ring-hud">
+            <div class="hero-stat" id="hero-stat">
+              <span class="value" id="cusp-count">24</span>
+              <span class="label">cusps</span>
+            </div>
+            <div class="stat-row">
+              <span><strong id="tooth-count">13</strong> teeth</span>
+              <span
+                >closes in <strong id="lap-count">13</strong>
+                <span id="lap-unit">laps</span></span
+              >
+              <span
+                ><strong id="rotation-count-stat">37</strong> spins to
+                close</span
+              >
+            </div>
 
-        <div class="controls">
-          <label for="teeth">Rolling gear teeth (against a fixed 24-tooth ring) — drag the gear above, or use this slider</label>
-          <input type="range" id="teeth" min="1" max="24" step="1" value="8" />
-          <div class="chip-row" role="group" aria-label="Jump to an interesting tooth count">
-            <button type="button" class="chip" data-teeth="8">
-              <span class="chip-num">8</span>
-              <span class="chip-tag">trefoil</span>
-            </button>
-            <button type="button" class="chip" data-teeth="7">
-              <span class="chip-num">7</span>
-              <span class="chip-tag">web</span>
-            </button>
-            <button type="button" class="chip" data-teeth="24">
-              <span class="chip-num">24</span>
-              <span class="chip-tag">cardioid</span>
-            </button>
+            <div class="dial" id="dial" aria-hidden="true">
+              <div class="dial-track"></div>
+              <div class="dial-handle-wrap">
+                <span class="dial-handle"></span>
+              </div>
+            </div>
+
+            <div
+              class="chip-row"
+              role="group"
+              aria-label="Jump to an interesting tooth count"
+            >
+              <button type="button" class="chip" data-teeth="8">
+                <span class="chip-num">8</span>
+                <span class="chip-tag">trefoil</span>
+              </button>
+              <button type="button" class="chip" data-teeth="7">
+                <span class="chip-num">7</span>
+                <span class="chip-tag">web</span>
+              </button>
+              <button type="button" class="chip" data-teeth="24">
+                <span class="chip-num">24</span>
+                <span class="chip-tag">cardioid</span>
+              </button>
+            </div>
+
+            <div class="controls sr-only">
+              <label for="teeth"
+                >Rolling gear teeth (against a fixed 24-tooth ring) — drag the
+                dial above, or use this slider</label
+              >
+              <input
+                type="range"
+                id="teeth"
+                min="1"
+                max="24"
+                step="1"
+                value="13"
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -69,42 +104,50 @@
       <section class="panel panel-info" id="info">
         <span class="kicker">03 · WHY IT MATTERS</span>
 
-        <div class="reveal">
-          <h2>The coin rotation paradox</h2>
-          <p>
-            Every time the rolling gear gets back to where it started, it has spun on its own axis
-            <strong id="rotation-count">4</strong> times — not the number of teeth divided by the
-            ring's, the way you'd guess. Push the slider all the way to 24, so the rolling gear
-            matches the ring tooth for tooth, and you get the classic result: roll one coin once
-            around an identical coin and it flips <strong>twice</strong>, not once. Going around
-            isn't the same as spinning — count it yourself with two coins on a table if it doesn't
-            look right.
-          </p>
-        </div>
+        <div class="info-grid">
+          <div class="reveal">
+            <h2>The coin rotation paradox</h2>
+            <p>
+              Every time the rolling gear gets back to where it started, it has
+              spun on its own axis
+              <strong id="rotation-count">37</strong> times — not the number of
+              teeth divided by the ring's, the way you'd guess. Turn the dial
+              all the way to 24, so the rolling gear matches the ring tooth for
+              tooth, and you get the classic result: roll one coin once around
+              an identical coin and it flips <strong>twice</strong>, not once.
+              Going around isn't the same as spinning — count it yourself with
+              two coins on a table if it doesn't look right.
+            </p>
+          </div>
 
-        <div class="reveal">
-          <h2>Why clock gears look like this</h2>
-          <p>
-            Almost every gear you've ever seen — car, bicycle, kitchen mixer — uses an involute
-            tooth profile: cheap to cut, and it meshes well across a wide range of tooth counts.
-            Traditional clock and watch gearing doesn't. It uses a cycloidal profile instead — the
-            tooth face shaped like an epicycloid, the flank like a hypocycloid — because clock
-            pinions run at very low tooth counts, sometimes single digits, and involute teeth mesh
-            badly down there. The curve this page draws is the same family of curve cut into every
-            mechanical clock gear you've ever taken apart.
-          </p>
-        </div>
+          <div class="reveal">
+            <h2>Why clock gears look like this</h2>
+            <p>
+              Almost every gear you've ever seen — car, bicycle, kitchen mixer —
+              uses an involute tooth profile: cheap to cut, and it meshes well
+              across a wide range of tooth counts. Traditional clock and watch
+              gearing doesn't. It uses a cycloidal profile instead — the tooth
+              face shaped like an epicycloid, the flank like a hypocycloid —
+              because clock pinions run at very low tooth counts, sometimes
+              single digits, and involute teeth mesh badly down there. The curve
+              this page draws is the same family of curve cut into every
+              mechanical clock gear you've ever taken apart.
+            </p>
+          </div>
 
-        <div class="reveal">
-          <h2>Not the same curve</h2>
-          <p>
-            Two things share a name with this curve closely enough to get confused with it, so:
-            the rotor housing in a Wankel engine is an <em>epitrochoid</em> — a related curve where
-            the pen sits off the rolling gear's rim rather than on it — not an epicycloid; the two
-            look similar but aren't the same shape. And an <em>epicyclic</em> (planetary) gear
-            train is a mechanical layout where gears' axes orbit each other — it shares a word root
-            with the tooth profile drawn here and nothing else.
-          </p>
+          <div class="reveal">
+            <h2>Not the same curve</h2>
+            <p>
+              Two things share a name with this curve closely enough to get
+              confused with it, so: the rotor housing in a Wankel engine is an
+              <em>epitrochoid</em> — a related curve where the pen sits off the
+              rolling gear's rim rather than on it — not an epicycloid; the two
+              look similar but aren't the same shape. And an
+              <em>epicyclic</em> (planetary) gear train is a mechanical layout
+              where gears' axes orbit each other — it shares a word root with
+              the tooth profile drawn here and nothing else.
+            </p>
+          </div>
         </div>
       </section>
     </main>
