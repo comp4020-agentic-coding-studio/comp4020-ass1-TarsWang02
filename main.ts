@@ -304,6 +304,66 @@ function init(
     });
   }
 
+  // Grab the gear on the canvas and turn it, instead of only dragging a
+  // linear slider. This drives the *same* range input the slider does (a
+  // dispatched real "input" event), so keyboard access and the single
+  // source of truth for tooth count are untouched -- it's an additional way
+  // to move the one real control, not a replacement for it.
+  const DEGREES_PER_TOOTH = 12;
+  let dragging = false;
+  let dragCenter = { x: 0, y: 0 };
+  let dragStartValue = r;
+  let dragPrevAngle = 0;
+  let dragAccumulatedDeg = 0;
+
+  function angleFromCenter(clientX: number, clientY: number): number {
+    return Math.atan2(clientY - dragCenter.y, clientX - dragCenter.x);
+  }
+
+  function wrappedDelta(delta: number): number {
+    let d = delta;
+    while (d > Math.PI) d -= 2 * Math.PI;
+    while (d <= -Math.PI) d += 2 * Math.PI;
+    return d;
+  }
+
+  canvas.addEventListener("pointerdown", (e) => {
+    const rect = canvas.getBoundingClientRect();
+    dragCenter = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+    dragging = true;
+    dragStartValue = r;
+    dragAccumulatedDeg = 0;
+    dragPrevAngle = angleFromCenter(e.clientX, e.clientY);
+    canvas.setPointerCapture(e.pointerId);
+  });
+
+  canvas.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    const angle = angleFromCenter(e.clientX, e.clientY);
+    dragAccumulatedDeg += (wrappedDelta(angle - dragPrevAngle) * 180) / Math.PI;
+    dragPrevAngle = angle;
+
+    const min = Number(teethSlider.min);
+    const max = Number(teethSlider.max);
+    const newValue = Math.min(
+      max,
+      Math.max(min, dragStartValue + Math.round(dragAccumulatedDeg / DEGREES_PER_TOOTH)),
+    );
+    if (newValue !== r) {
+      teethSlider.value = String(newValue);
+      teethSlider.dispatchEvent(new Event("input", { bubbles: true }));
+    }
+  });
+
+  function endDrag(e: PointerEvent): void {
+    if (!dragging) return;
+    dragging = false;
+    if (canvas.hasPointerCapture(e.pointerId)) canvas.releasePointerCapture(e.pointerId);
+  }
+
+  canvas.addEventListener("pointerup", endDrag);
+  canvas.addEventListener("pointercancel", endDrag);
+
   window.addEventListener("resize", () => {
     resize();
     if (reduceMotion) drawComplete();

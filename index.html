@@ -13,55 +13,62 @@
       </nav>
     </header>
     <main>
-      <h1>Rolling</h1>
-      <p class="intro">
-        One small gear rolls around a fixed ring. A pen point on its rim traces a curve as it
-        goes. Nothing else is happening here — and one slider is enough to turn a 3-petal figure
-        into a 24-cusp web.
-      </p>
+      <section class="panel panel-intro" id="intro">
+        <span class="kicker">01 · INTRO</span>
+        <h1>Rolling</h1>
+        <p class="intro">
+          One small gear rolls around a fixed ring. A pen point on its rim traces a curve as it
+          goes. Nothing else is happening here — and one number is enough to turn a 3-petal figure
+          into a 24-cusp web.
+        </p>
+        <a class="scroll-cue" href="#interactive">
+          <span>Try it</span>
+          <span class="scroll-cue-arrow" aria-hidden="true">↓</span>
+        </a>
+      </section>
 
-      <figure class="stage">
-        <span class="corner corner-tl" aria-hidden="true"></span>
-        <span class="corner corner-tr" aria-hidden="true"></span>
-        <span class="corner corner-bl" aria-hidden="true"></span>
-        <span class="corner corner-br" aria-hidden="true"></span>
+      <section class="panel panel-interactive" id="interactive">
+        <span class="kicker">02 · INTERACTIVE</span>
+        <h2>Turn the gear</h2>
+
         <div class="canvas-wrap">
-          <canvas id="curve" aria-label="A curve traced by a small gear rolling around a fixed ring, drawn as an epicycloid."></canvas>
+          <canvas id="curve" aria-label="A curve traced by a small gear rolling around a fixed ring, drawn as an epicycloid. Click and drag the gear to turn it, or use the slider below."></canvas>
           <span class="hud-angle" aria-hidden="true">&theta; <span id="theta-readout">0.0</span>&deg;</span>
         </div>
-        <figcaption>
-          <div class="hero-stat" id="hero-stat">
-            <span class="value" id="cusp-count">3</span>
-            <span class="label">cusps</span>
-          </div>
-          <div class="stat-row">
-            <span><strong id="tooth-count">8</strong> teeth</span>
-            <span>closes in <strong id="lap-count">1</strong> <span id="lap-unit">lap</span></span>
-            <span><strong id="rotation-count-stat">4</strong> spins to close</span>
-          </div>
-        </figcaption>
-      </figure>
 
-      <div class="controls">
-        <label for="teeth">Rolling gear teeth (against a fixed 24-tooth ring)</label>
-        <input type="range" id="teeth" min="1" max="24" step="1" value="8" />
-        <div class="chip-row" role="group" aria-label="Jump to an interesting tooth count">
-          <button type="button" class="chip" data-teeth="8">
-            <span class="chip-num">8</span>
-            <span class="chip-tag">trefoil</span>
-          </button>
-          <button type="button" class="chip" data-teeth="7">
-            <span class="chip-num">7</span>
-            <span class="chip-tag">web</span>
-          </button>
-          <button type="button" class="chip" data-teeth="24">
-            <span class="chip-num">24</span>
-            <span class="chip-tag">cardioid</span>
-          </button>
+        <div class="hero-stat" id="hero-stat">
+          <span class="value" id="cusp-count">3</span>
+          <span class="label">cusps</span>
         </div>
-      </div>
+        <div class="stat-row">
+          <span><strong id="tooth-count">8</strong> teeth</span>
+          <span>closes in <strong id="lap-count">1</strong> <span id="lap-unit">lap</span></span>
+          <span><strong id="rotation-count-stat">4</strong> spins to close</span>
+        </div>
 
-      <section class="framing">
+        <div class="controls">
+          <label for="teeth">Rolling gear teeth (against a fixed 24-tooth ring) — drag the gear above, or use this slider</label>
+          <input type="range" id="teeth" min="1" max="24" step="1" value="8" />
+          <div class="chip-row" role="group" aria-label="Jump to an interesting tooth count">
+            <button type="button" class="chip" data-teeth="8">
+              <span class="chip-num">8</span>
+              <span class="chip-tag">trefoil</span>
+            </button>
+            <button type="button" class="chip" data-teeth="7">
+              <span class="chip-num">7</span>
+              <span class="chip-tag">web</span>
+            </button>
+            <button type="button" class="chip" data-teeth="24">
+              <span class="chip-num">24</span>
+              <span class="chip-tag">cardioid</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel panel-info" id="info">
+        <span class="kicker">03 · WHY IT MATTERS</span>
+
         <div class="reveal">
           <h2>The coin rotation paradox</h2>
           <p>

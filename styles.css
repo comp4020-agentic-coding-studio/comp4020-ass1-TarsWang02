@@ -1,6 +1,5 @@
 :root {
   --bg: #05070c;
-  --bg-panel: #0b0f18;
   --border: #1c2433;
   --fg: #e6edf3;
   --fg-dim: #8b96a8;
@@ -15,9 +14,12 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-snap-type: y proximity;
+}
+
 body {
   margin: 0;
-  padding: 2.5rem 1rem 4rem;
   font-family: system-ui, sans-serif;
   line-height: 1.6;
   color: var(--fg);
@@ -26,19 +28,56 @@ body {
     var(--bg);
 }
 
+header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 1.25rem 1.5rem;
+  z-index: 10;
+}
+
 main {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Each stage of the piece is a full-viewport panel, snapped to on scroll --
+   a progressive, page-like feel from a single static document, not three
+   separate pages: no routing, no page loads, one particle system carried
+   through the whole scroll. */
+.panel {
+  min-height: 100svh;
+  width: 100%;
   max-width: 40rem;
   margin: 0 auto;
+  padding: 5rem 1.25rem 3rem;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
+  justify-content: center;
+  gap: 1rem;
+  scroll-snap-align: start;
+}
+
+.kicker {
+  align-self: flex-start;
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  color: var(--curve);
+  opacity: 0.85;
 }
 
 h1 {
   align-self: flex-start;
   letter-spacing: -0.02em;
   text-shadow: 0 0 24px var(--curve-glow);
+}
+
+.panel-interactive h2 {
+  align-self: flex-start;
+  margin: 0;
 }
 
 .intro {
@@ -59,75 +98,57 @@ nav a:focus-visible {
   text-decoration: underline;
 }
 
-.stage {
-  position: relative;
-  width: 100%;
-  max-width: 32rem;
-  margin: 0;
-  padding: 1.25rem;
+.scroll-cue {
+  align-self: flex-start;
+  margin-top: 1.5rem;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  background: var(--bg-panel);
-  border: 1px solid var(--border);
-  border-radius: 6px;
+  gap: 0.5rem;
+  color: var(--fg-dim);
+  text-decoration: none;
+  font-family: var(--mono);
+  font-size: 0.85rem;
 }
 
-.corner {
-  position: absolute;
-  width: 14px;
-  height: 14px;
-  border: 2px solid var(--curve);
-  opacity: 0.55;
-  pointer-events: none;
+.scroll-cue:hover,
+.scroll-cue:focus-visible {
+  color: var(--curve);
 }
 
-.corner-tl {
-  top: -1px;
-  left: -1px;
-  border-right: none;
-  border-bottom: none;
+@media (prefers-reduced-motion: no-preference) {
+  .scroll-cue-arrow {
+    display: inline-block;
+    animation: bob 1.6s ease-in-out infinite;
+  }
 }
 
-.corner-tr {
-  top: -1px;
-  right: -1px;
-  border-left: none;
-  border-bottom: none;
+@keyframes bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(4px);
+  }
 }
 
-.corner-bl {
-  bottom: -1px;
-  left: -1px;
-  border-right: none;
-  border-top: none;
-}
-
-.corner-br {
-  bottom: -1px;
-  right: -1px;
-  border-left: none;
-  border-top: none;
-}
-
-/* Glow lives on this static wrapper, not the canvas itself: the canvas
-   repaints every animation frame, and a per-frame filter on a repainting
-   element forces the browser to re-rasterize the blur 60 times a second —
-   measured as a real jank/hang risk in testing, not just a theoretical one.
-   A box-shadow on this non-repainting wrapper is composited once and reused. */
 .canvas-wrap {
   position: relative;
   width: 100%;
-  border-radius: 4px;
-  box-shadow: 0 0 22px -4px var(--curve-glow);
+  max-width: min(80vw, 30rem);
 }
 
 #curve {
   width: 100%;
   aspect-ratio: 1 / 1;
   display: block;
-  border-radius: 4px;
+  cursor: grab;
+  touch-action: none;
+}
+
+#curve:active {
+  cursor: grabbing;
 }
 
 .hud-angle {
@@ -138,6 +159,7 @@ nav a:focus-visible {
   font-size: 0.7rem;
   color: var(--fg-dim);
   letter-spacing: 0.04em;
+  pointer-events: none;
 }
 
 .hero-stat {
@@ -195,17 +217,19 @@ nav a:focus-visible {
 
 .controls {
   width: 100%;
-  max-width: 32rem;
+  max-width: 26rem;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
+  margin-top: 0.5rem;
 }
 
 .controls label {
   font-family: var(--mono);
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   color: var(--fg-dim);
   letter-spacing: 0.02em;
+  text-align: center;
 }
 
 .controls input[type="range"] {
@@ -307,10 +331,10 @@ nav a:focus-visible {
   box-shadow: 0 0 12px var(--curve-glow);
 }
 
-.framing {
-  align-self: flex-start;
-  margin-top: 1rem;
-  width: 100%;
+.panel-info {
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0;
 }
 
 .reveal {
@@ -319,7 +343,7 @@ nav a:focus-visible {
   transition:
     opacity 0.6s ease,
     transform 0.6s ease;
-  margin-bottom: 1.5rem;
+  margin-top: 2rem;
 }
 
 .reveal.in-view {
@@ -335,18 +359,18 @@ nav a:focus-visible {
   }
 }
 
-.framing h2 {
+.reveal h2 {
   font-size: 1.1rem;
   margin-bottom: 0.35rem;
   color: var(--fg);
 }
 
-.framing p {
+.reveal p {
   margin-top: 0;
   color: var(--fg-dim);
 }
 
-.framing strong,
-.framing em {
+.reveal strong,
+.reveal em {
   color: var(--fg);
 }
