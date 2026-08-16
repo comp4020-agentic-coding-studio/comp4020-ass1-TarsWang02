@@ -4,7 +4,7 @@
 
 A static, client-side interactive explainer. One small gear rolls around a
 fixed ring; the pen point on its rim deposits particles as it goes; those
-particles **are** the curve. One slider changes the rolling gear's tooth
+particles **are** the curve. One control changes the rolling gear's tooth
 count, and the figure it traces changes completely.
 
 The thesis, in one sentence:
@@ -133,7 +133,18 @@ mid-use, and tabs through it. Design for exactly that.
   re-target smoothly rather than hard-cutting.
 - **A range input gives keyboard access for free.** Use a real
   `<input type="range">`. Do not replace it with a custom canvas-drag control;
-  drag-only interaction fails the tab-through check outright.
+  drag-only interaction fails the tab-through check outright. A pointer-driven
+  control layered _on top_ is allowed, and is what shipped (the ring dial),
+  but only on these terms: the range input stays in the DOM, stays focusable
+  (`sr-only`, never `display:none`), and remains the single source of truth —
+  the dial sets `.value` on that same element and dispatches a real `input`
+  event. If a gesture ever becomes the only way to reach a value, it has
+  broken this rule.
+- **Pointer controls must respond to a plain click, not only a drag.** The
+  dial first shipped accumulating relative rotation, which meant clicking it
+  did nothing at all and the only grab target was a handful of pixels. Map
+  pointer angle absolutely onto the control's sweep instead, and snap the
+  dead zone to the nearer end.
 - **Everything readable must be DOM text, not canvas text.** Cusp count, lap
   count, tooth count: real elements, so they are selectable, zoomable, and
   reachable by a screen reader. Canvas-rendered numbers are invisible to all
@@ -148,8 +159,20 @@ Both 1920×1080 and 390×844 are full marking environments.
   wide-versus-tall layout problem to solve; do not invent one.
 - Compute the scale factor from `R + 2r` every time the parameters or the
   canvas size change, so the figure always fills its box without clipping.
-- Controls sit **below** the canvas at both sizes: one column on the phone,
-  and the same single column centred on desktop. Do not build two layouts.
+- Controls and readouts sit **inside the fixed ring's hole**, centred on the
+  canvas, at both sizes — the same single arrangement, not two layouts. (This
+  replaces an earlier "controls sit below the canvas" rule; the ring's
+  interior is dead space the rolling gear can never enter, and putting the
+  cause and the numbers in one focal point beats stacking them apart.)
+- **The ring's hole is not a fixed size.** Its on-screen radius is
+  `R · scale` where `scale = (cssSize/2) / (R + 2r)`, so it shrinks sharply as
+  tooth count rises — at `r=24` it is roughly half its `r=8` size. Size the
+  HUD and its font from that measured value on every parameter and resize
+  change, never from a constant.
+- **Below a legibility floor, drop the secondary readouts rather than shrink
+  them.** Everything in the HUD scales from one font size, so it never
+  overflows — but it does become unreadable. Under ~105px of ring diameter the
+  stat row and preset chips are hidden, leaving the cusp number and the dial.
 - Re-resolve canvas size, DPR and particle count on resize; the marker resizes
   mid-interaction and a stale backing store shows up immediately.
 
@@ -196,6 +219,13 @@ Anything not in this list is out of scope: no multi-page site, no hypocycloid
 (inside-rolling) mode, no Fourier/Lissajous side quests, no audio, no WebGL,
 no library dependency. One idea, carried all the way.
 
+What "no multi-page site" rules out is routing and page loads, not a sense of
+progression. The three stages above ship as three full-viewport scroll-snap
+panels inside the **one** `index.html`: no router, no navigation, no second
+document, and one particle system running continuously across all of them.
+The panels are joined by native scrolling — deliberately not by the particle
+field, which would break "particles are never a transition".
+
 ## Evidence, which is 45% of the mark
 
 Larger than the artefact criterion. Build the record as you go — it cannot be
@@ -227,3 +257,14 @@ reconstructed afterwards.
 - Verify the maths numerically, not by eye: assert `R / gcd(R, r)` against
   known pairs in a test. A curve can look plausible and be wrong.
 - When a check fails, read the failure before changing anything.
+- **Never let a JS-gated hidden state be able to render the page blank.** The
+  scroll entrance animations start at `opacity: 0`, so a script that failed to
+  load would have shown a reader nothing at all. Every hidden state is gated
+  behind a `js-reveal` class that JS adds at startup: if the script dies, the
+  page degrades to "no animation", never to "no page". Any future
+  reveal-on-scroll effect goes behind the same gate.
+- **`document.hidden` before blaming the animation.** A backgrounded or
+  occluded tab stops `requestAnimationFrame` *and* IntersectionObserver
+  delivery, so a stalled figure or a section stuck at `opacity: 0` is usually
+  the window being behind another one, not a bug. Check it first; it has
+  already cost time twice.

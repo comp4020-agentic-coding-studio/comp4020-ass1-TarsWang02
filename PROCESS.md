@@ -3,57 +3,61 @@
 ## What I built
 
 Rolling: an interactive explainer where one small gear rolls around a fixed
-24-tooth ring, a pen point on its rim deposits particles as it goes, and
-those particles are the curve — an epicycloid traced live from the
-parametric equation. One slider changes the rolling gear's tooth count; that
-single number decides whether the result is a 3-petal figure that closes in
-one lap or a 24-cusp web that takes seven. The point of view is that the
-elaborate figure isn't complicated — it's one circle rolling, and the only
-thing that changed was how many teeth it has.
+24-tooth ring and a pen point on its rim deposits particles as it goes — those
+particles are the curve, an epicycloid traced live from the parametric
+equation. One control changes the gear's tooth count, and that number alone
+decides whether the result is a 3-petal figure closing in one lap or a 24-cusp
+web taking thirteen. The elaborate figure isn't complicated: it's one circle
+rolling.
 
 ## The moments that mattered
 
 1. **Fixing the deploy path before writing any product code.** The starter
    ships with `pnpm check:evidence` red on a fresh checkout — no
-   `reflections/assignment-1.md`, and `PROCESS.md` full of fake commit
-   hashes that gate CI's deploy job. The obvious move is to leave that until
-   the very end, once there's real content to put in it. Instead I fixed the
-   gate first, with honest (if minimal) content, then flipped the repo
-   public and dispatched CI to confirm the whole pipeline — build, evidence
-   check, secret scans, Pages deploy, live-URL check — actually worked,
-   before betting a day of work on it.
+   `reflections/assignment-1.md`, and a `PROCESS.md` of fake commit hashes
+   that gate CI's deploy job. The obvious move is to leave it until the end,
+   once there's real content for it. I fixed the gate first with honest if
+   minimal content, made the repo public, and dispatched CI to confirm the
+   whole pipeline — build, evidence, deploy, live-URL check — worked before
+   betting a day of work on it.
    [`2f57aa2`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-TarsWang02/commit/2f57aa2)
 
-2. **Not trusting a "broken" animation without finding out why.** Once the
-   particle system was wired up, the rolling gear appeared to crawl —
-   barely moving after several real seconds, when the physics said it
-   should have completed a full lap. The obvious fix would have been to
-   guess: raise the angular velocity, or loosen the `dt` clamp CLAUDE.md's
-   particle standards require (`dt = min(realDt, 1/30)`, specifically to
-   stop a backgrounded tab from teleporting). I checked `document.hidden`
-   in-page instead of guessing, and it was `true` — the browser automation
-   tool reports its own tab as hidden regardless of clicking into it, which
-   throttles `requestAnimationFrame` hard. The dt clamp was doing exactly
-   its job on exactly the scenario it exists for; the bug hypothesis was
-   wrong. To verify the frame-stepping and wraparound logic was actually
-   correct despite not being able to watch it run at real speed, I wrote a
-   standalone Node simulation of the same stepping code at a fixed 60fps,
-   decoupled from wall-clock time — it confirmed deposits-per-lap matched
-   capacity exactly across multiple wraps for both the 1-lap and 7-lap
-   cases. Loosening the clamp to make testing more convenient would have
-   shipped a real bug (background-tab teleporting) to fix a fake one.
+2. **Not trusting a "broken" animation without finding out why.** With the
+   particles wired up the gear appeared to crawl, barely moving after several
+   seconds when the physics said it should have finished a lap. The
+   obvious fixes were to raise the angular velocity or loosen the
+   `dt = min(realDt, 1/30)` clamp CLAUDE.md's particle standards require. I
+   checked `document.hidden` instead; it was `true`. The automation browser
+   reports its own tab as hidden, throttling `requestAnimationFrame` hard —
+   the clamp was doing its job on exactly the case it exists for. To test the
+   stepping logic without watching it run, I wrote a standalone Node
+   simulation at a fixed 60fps; deposits per lap matched capacity across
+   multiple wraps. Loosening the clamp would have shipped a real bug to fix a
+   fake one.
    [`e32f729`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-TarsWang02/commit/e32f729)
 
-3. **Cutting a claim rather than shipping it vague.** Writing the "not the
-   same curve" section, the easy version was "this is like a Wankel
-   engine's rotor" — punchier, and wrong: the Wankel housing is an
-   epitrochoid (pen off the rolling circle's rim), and this page only ever
-   renders the d=r case, a true epicycloid (pen on the rim). CLAUDE.md is
-   explicit that an imprecise real-world claim costs more than a missing
-   one, so I wrote the distinction instead of the loose analogy, and did
-   the same for epicyclic (planetary) gear trains, which share a word root
-   with this curve's tooth profile and nothing else.
+3. **Cutting a claim rather than shipping it vague.** For the "not the same
+   curve" section the easy line was "like a Wankel engine's rotor" — punchier,
+   and wrong: the Wankel housing is an epitrochoid, and this page renders only
+   the `d = r` case, a true epicycloid. CLAUDE.md says an imprecise claim
+   costs more than a missing one, so I wrote the distinction instead, and did
+   the same for epicyclic gear trains.
    [`e3f627f`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-TarsWang02/commit/e3f627f)
+
+4. **Surfacing a conflict instead of quietly resolving it.** A later request —
+   progressive intro/interactive/info stages, and a more direct "turn the
+   gear" control — ran into two invariants I had written into CLAUDE.md
+   myself: "no multi-page site" is explicit out-of-scope, and
+   "particles are never a transition" rules out using the particle field to
+   move between stages. Rather than bend either quietly, I laid the conflict
+   out and asked first, then built what fits inside both: three scroll-snap
+   panels in one document — no router, no page load, one particle system
+   throughout — joined by native scrolling, so a particle still means exactly
+   one thing everywhere. The dial is additive; the real range input still
+   drives the render, so tab-through survives. Both resolutions are now in
+   CLAUDE.md, so the next change reads them, not the rules they appear to
+   break.
+   [`54cd69b`](https://github.com/comp4020-agentic-coding-studio/comp4020-ass1-TarsWang02/commit/54cd69b)
 
 ## Before you ship
 
