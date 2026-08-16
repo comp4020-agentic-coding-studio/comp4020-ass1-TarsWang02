@@ -3,21 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>COMP4020 prototype</title>
+    <title>Rolling — one gear, every gear tooth curve</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
     <header>
       <nav aria-label="Primary">
-        <a href="./">Home</a>
+        <a href="./">Rolling</a>
       </nav>
     </header>
     <main>
-      <h1>COMP4020 prototype</h1>
-      <p data-testid="intro">
-        Replace this with your prototype. This week's brief is on the course website;
-        <code>spec/README.md</code> explains how the checks in this repo relate to it.
+      <h1>Rolling</h1>
+      <p class="intro">
+        One small gear rolls around a fixed ring. A pen point on its rim traces a curve as it
+        goes. Nothing else is happening here — and one slider is enough to turn a 3-petal figure
+        into a 24-cusp web.
       </p>
+
+      <figure class="stage">
+        <canvas id="curve" aria-label="A curve traced by a small gear rolling around a fixed ring, drawn as an epicycloid."></canvas>
+        <figcaption class="readouts">
+          <span><strong id="tooth-count">8</strong> teeth on the rolling gear</span>
+          <span><strong id="cusp-count">3</strong> cusps</span>
+          <span>closes in <strong id="lap-count">1</strong> lap</span>
+        </figcaption>
+      </figure>
     </main>
     <script type="module" src="./main.ts"></script>
   </body>
