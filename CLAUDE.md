@@ -1,162 +1,229 @@
-# COMP4020 prototype
+# Rolling — an interactive explainer about epicycloids and gear teeth
 
-This is your starter repo for a COMP4020 prototype: a static site written in
-HTML/CSS/TypeScript that builds to plain HTML/CSS/JS and deploys to GitHub
-Pages. The **deployed site is what gets marked** --- not this repo, and not "it
-works on my machine". It's marked live in Chrome against the deployed URL at two
-viewports --- 1920×1080 (desktop) and 390×844 (phone) --- and both count in
-full, so make that artefact good at both and use the checks below to know
-whether it is.
+## What this is
 
-What you're building this week — the spec — is published on the course website,
-and this repo's name tells you which deliverable it is. Run the course plugin's
-**start** skill at the start of each week: it pulls the right spec from the
-course API, carries your harness forward from last week, and helps you turn the
-spec's checkable lines into tests of your own. Read the spec before you build,
-and see `spec/README.md` for how the checks in this repo relate to it.
+A static, client-side interactive explainer. One small gear rolls around a
+fixed ring; the pen point on its rim deposits particles as it goes; those
+particles **are** the curve. One slider changes the rolling gear's tooth
+count, and the figure it traces changes completely.
 
-## How to work in here
+The thesis, in one sentence:
 
-- Keep the dev server running (`pnpm dev`) so you see changes as you make them.
-- Before you push, run `pnpm check`. It runs most of what CI runs --- build,
-  lint, and the spec --- so you catch those in seconds instead of waiting for
-  the pipeline. The links check, the evidence check, the secrets scan, and the
-  deploy itself only run in CI; run `pnpm dlx linkinator ./dist --silent`
-  locally against a fresh `pnpm build` for the links check without waiting for
-  CI.
-- To see what the page actually looks like rather than what you assume it looks
-  like, open it in a browser (the `agent-browser` CLI, documented on
-  [the course site](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/backpressure/#agent-browser-the-rendered-page-as-ground-truth),
-  works well for this). The rendered page is the truth; your mental model of it
-  isn't.
-- When a check fails, read its output before changing anything. Each check below
-  names what it measures, and the failure message is the instruction: it tells
-  you the file, the line, or the contract. Treat a red check as authoritative
-  --- the page is wrong until the check is green, not until you decide it should
-  be.
-- Commit when the checks pass. Never commit a red state.
+> The elaborate figure is not complicated — it is one circle rolling, and the
+> only thing you changed was how many teeth it has.
 
-## The checks (your sensors)
+Three things this is arguing, in order of how much they matter:
 
-CI runs these on every push once your repo is public. GitHub's checks UI shows
-two jobs, `check` and `deploy` --- not one status per sensor below --- and
-within `check` the steps run in sequence (`pnpm check` chains typecheck, build,
-lint, and the spec with `&&`), so an early failure like a broken build stops the
-later sensors from running for that push; fix it and push again to see the rest.
-While the repo is private (all week, until you ship) the CI jobs stay skipped
---- `pnpm check` is the same roster on your machine, and it's the faster loop
-anyway. They aren't hoops. Each is a different way of finding out something true
-about the site that you can't reliably see by looking at it.
+1. **Simple rule, complex result.** The whole figure comes from one point on
+   one rolling circle. Nothing else.
+2. **One parameter is the whole world.** 8 teeth and 7 teeth differ by one
+   tooth and produce entirely different objects — a 3-petal figure that closes
+   in one lap, versus a 24-cusp web that takes seven laps to close.
+3. **This is why clock gears look like that.** The curve isn't decorative
+   maths; traditional clock gear teeth are cut to this profile because it
+   meshes smoothly at low tooth counts.
 
-They also carry a mark at a crit: the sweep runs fifteen minutes after your
-cutoff, and green checks there are worth half that week's shipped mark. Still
-running counts as not green, so ship with time for CI to finish.
+## The concept invariants
 
-- **typecheck** --- `tsc --noEmit` runs first in `pnpm check`, so a type error
-  stops the roster before the build even starts. The types are extra
-  backpressure: a red here is the compiler telling you a claim in the code is
-  false.
-- **build** --- the site must build (`pnpm build`). A build failure means the
-  deployed site is broken or stale, so nothing else matters until this is green.
-- **deploy / online** --- the live GitHub Pages URL must load and return the
-  page you expect. An asset that 404s on the deployed URL counts as broken even
-  if it loads locally.
-- **spec** --- `spec/invariants.test.ts` asserts what's true of any good
-  website, whatever the week's brief asks; the tests you write for the week's
-  own spec run alongside it (any `spec/*.test.ts`). A failure names the contract
-  you haven't met yet.
-- **lint** --- `stylelint` for CSS, `oxlint` for TypeScript. Flags code that's
-  wrong, fragile, or non-idiomatic. Read the rule it names.
-- **tests** --- any other tests you write, wherever you put them (co-located
-  with your source is fine, not just `spec/`), must pass. Vitest picks up both
-  this and the spec suite in one `vitest run`, the last step of `pnpm check`. A
-  failing test is a claim about the site that's no longer true.
-- **evidence** (`pnpm check:evidence`) --- checks your process evidence:
-  `PROCESS.md`'s citations resolve to real commits, the current deliverable's
-  exact reflection is in `reflections/` (worked out from this repo's name
-  against the public course API), and your `CLAUDE.md` is present. Evidence
-  gates the deploy --- `deploy` needs `check` to pass, so failing evidence
-  blocks the deploy alongside everything else. See
-  [Your process is part of the mark](#your-process-is-part-of-the-mark) below,
-  and the course website's
-  [assessment page](https://comp.anu.edu.au/courses/comp4020-agentic-coding-studio/topics/assessment/#what-you-submit)
-  for what counts as evidence.
-- **links** --- internal links must resolve. A broken link is a dead end you
-  didn't mean to ship.
-- **secrets** --- the repo is scanned for committed credentials. Never put a
-  key, token, or password in a tracked file. If one leaks, rotate it. A local
-  pre-commit hook (`.githooks/pre-commit`, installed by `pnpm install`) also
-  blocks any commit containing something shaped like an API key --- by the time
-  CI sees a key it's already pushed, so the hook is the sensor that matters.
+These are what the prototype is _for_. Breaking one of these is not a bug to
+fix later, it is the prototype no longer making its argument. If a change
+would break one, don't make the change.
 
-Nothing here measures **accessibility** or **performance** --- wiring those
-sensors (`axe-core`, Lighthouse, or whatever you choose) is your work, and later
-in the course the spec will ask you to show how you tested both. When you do,
-read a green performance result honestly: it's a lab estimate from one run on a
-CI machine, not proof the site is fast for real users.
+- **Particles are trajectory, never decoration and never a transition.** Every
+  particle marks a position the pen actually occupied on its path. Particles
+  never morph, fly, scatter, or tween between two unrelated shapes. If a
+  particle is somewhere the pen never was, that is a bug.
+- **The curve is generated, never drawn.** No preset `<path>`, no traced SVG,
+  no hardcoded point list. It comes out of the parametric equation every time,
+  at every parameter value. A reader who changes the slider must be watching
+  real maths, not a lookup table of pretty pictures.
+- **The slider is a tooth count, not a ratio.** The control says
+  `8 teeth` against a `24-tooth` ring, never `R/r = 3`. Tying the parameter to
+  a countable physical thing is the entire reason the gear framing works. Do
+  not "simplify" this into an abstract ratio slider.
+- **The rolling gear stays visible while it draws.** The cause (a small circle
+  rolling) and the effect (a large curve) must be on screen together. Hiding
+  the gear and showing only the finished curve removes the explanation.
 
-## The stack is swappable
+## Domain facts (get these right)
 
-Out of the box this is plain HTML/CSS/TypeScript on Vite, and every `.html` file
-in the repo is a page: add pages, link them, and the build picks them up with no
-config. That's a default, not a rule (unless the week's spec says otherwise).
-You can swap in Astro or any other static generator, because nothing in CI names
-a tool --- the whole contract is:
+The parametric curve, rolling on the **outside** of a fixed circle of radius
+`R`, rolling circle radius `r`, pen at distance `d` from the rolling centre:
 
-- `pnpm build` emits the complete site into `dist/`
-- the `package.json` scripts (`check`, `check:evidence`, `build`) keep working
-- whatever lands in `dist/` still passes the invariants in `spec/`
+```
+x = (R + r)·cos θ − d·cos(((R + r)/r)·θ)
+y = (R + r)·sin θ − d·sin(((R + r)/r)·θ)
+```
 
-Two things bite in a swap. The deployed site lives under a path
-(`…github.io/<repo>/`), so configure your generator's base path --- this
-template's Vite config uses relative asset URLs to sidestep that, but most
-generators (Astro included) need `base` set explicitly, and getting it wrong
-looks fine locally while every asset 404s on the live URL. And commit the
-updated `pnpm-lock.yaml`: CI installs with `--frozen-lockfile`.
+- `d = r` is a true **epicycloid** — the pen is on the rim, and the curve has
+  sharp cusps touching the ring.
+- `d ≠ r` is an **epitrochoid** — rounded loops (`d < r`) or self-crossing
+  loops (`d > r`). Use the correct word for whichever you render.
+- With integer tooth counts `R` and `r`, let `g = gcd(R, r)`:
+  - cusps = `R / g`
+  - laps to close = `r / g`
+  - Verify: `R=24, r=8` → 3 cusps, closes in 1 lap. `R=24, r=7` → 24 cusps,
+    closes in 7 laps.
+- `R = r` (1:1) is a **cardioid**, and it is the **coin rotation paradox**: a
+  coin rolled once around an identical coin turns twice, not once. This is a
+  real, checkable claim — it is the strongest hook in the piece.
 
-## Your process is part of the mark
+Three claims about the real world that must be stated precisely, because the
+imprecise versions are wrong:
 
-The deployed page is only half of it. How you got there is marked too: your
-commit history, your agent files, and the decisions visible across them. The
-checks above can't see any of that, so a person reads it directly --- which
-means building legibly is part of building well.
+- **Clock gears — true.** Traditional clock and watch gearing uses a cycloidal
+  tooth profile (epicycloidal face, hypocycloidal flank), not the involute
+  profile used in most modern machinery. The reason is that it meshes better
+  at the very low tooth counts clock pinions use.
+- **Wankel rotor — say epitrochoid, not epicycloid.** The rotor housing is an
+  epitrochoid. Calling it an epicycloid is wrong; don't write it.
+- **Epicyclic (planetary) gear trains are a different thing.** That is gears
+  whose _axes_ orbit, a mechanical layout. It shares a word root with cycloidal
+  _tooth profiles_ and nothing else. Never imply they're the same idea.
 
-- **Commit as you go.** Small, frequent commits are the record of how the work
-  came together, and that record is read, not just the final state. A trail that
-  grew alongside the code is the strongest evidence of your process; a single
-  dump the night before is the weakest.
-- **Keep a process overview** (`PROCESS.md`). A short reading-guide, not an
-  essay: what you built, the moments that mattered --- each pointing at a
-  commit, a `CLAUDE.md` change, or a prompt and the commit it produced --- and
-  where to look in the history. It points a marker at the evidence; it doesn't
-  stand in for it, and claims the history doesn't back don't count. The
-  `PROCESS.md` in this repo is a template showing the shape and the citation
-  format (link text the commit hash or range, target the commit or compare URL);
-  `pnpm check:evidence` verifies your citations resolve to real commits before
-  you ship. Markers follow those citations and don't trawl the repo for evidence
-  you didn't cite.
-- **Write your reflection in `reflections/`** --- a short markdown file in this
-  repo, named for the deliverable it answers, so the number in the filename is
-  the number in this repo's name (`crit-1.md` in `comp4020-crit1-<you>`,
-  `assignment-1.md` in `comp4020-ass1-<you>`); `reflections/README.md` has the
-  full rule. `pnpm check:evidence` checks the exact current name against the
-  course API, not merely the presence of any well-named file. It answers the two
-  standing prompts: the breakthrough that moved the work forward, and what this
-  work changed about the developer you want to be. It stays out of the deployed
-  site. It's due at the cutoff, and if it isn't in the repo by then the week
-  doesn't count as shipped, however good the prototype is.
-- **This file is process evidence.** The harness you build to direct the agent,
-  this `CLAUDE.md` and any `AGENTS.md`, is itself read as part of how you
-  worked. Keep it honest and current (see below).
+If you cannot state a real-world claim precisely, cut it. An imprecise claim
+in an explainer costs more than a missing one.
 
-You don't need a name, a student number, or any identity file in the repo: we
-know whose repo it is. Spend the effort on the work.
+## Particle rendering standards
 
-## This file is yours
+These are the rules that keep the particle layer fast enough to survive the
+phone viewport. They are not stylistic preferences.
 
-This CLAUDE.md is a starting point, not a fixed rulebook. As you learn what your
-prototype needs --- a convention to hold the agent to, a sensor that keeps
-catching you out, a fact about the stack the agent keeps getting wrong --- write
-it down here. Growing this file is the work of harness engineering, and the gap
-between this boilerplate and your own version is part of what your prototype
-says about the developer you're becoming.
+- **Sample the equation, never `getImageData`.** The canonical particle-shape
+  technique (render target to an offscreen canvas, read pixels, threshold on
+  alpha, use those as targets) exists because most shapes have no closed form.
+  This one does. Sampling the parametric equation directly is exact,
+  resolution-independent, and cheaper. Do not reach for the imageData habit.
+- **Typed arrays, not object arrays.** Particle state lives in
+  `Float32Array`s (`px`, `py`, and any velocity/phase channels), allocated
+  once at setup. No `{x, y}` object per particle, no per-frame allocation —
+  that is what makes a particle field stutter under GC.
+- **`fillRect`, not `arc`.** `beginPath` + `arc` + `fill` per particle is the
+  classic particle-canvas performance mistake. A 1–2px `fillRect` is several
+  times faster and visually indistinguishable at this size. Batch by setting
+  `fillStyle` once outside the loop.
+- **Trails come from a low-alpha fill, not from `clearRect`.** Painting the
+  background at low alpha each frame (rather than clearing it) leaves a decay
+  trail for free, and that decay is exactly the "the path is being laid down
+  and slowly settling" feel this piece wants. Tune the alpha; don't build a
+  per-particle history buffer.
+- **Device pixel ratio, capped.** `canvas.width = cssWidth * min(dpr, 2)` and
+  scale the context. Uncapped DPR on a phone is a silent 3× fill-rate cost.
+- **Particle count scales with viewport width**, resolved once at setup and
+  again on resize. The desktop count must never be what a 390px phone runs.
+- **Clamp the frame delta.** `dt = min(realDt, 1/30)` so a backgrounded tab
+  resuming doesn't teleport the simulation.
+- **Respect `prefers-reduced-motion`.** When set, skip the animated deposition
+  and render the completed curve immediately. The piece must still explain
+  itself with no motion at all.
+
+## Interaction contract
+
+The marker opens the live URL, uses the core interaction for a minute, resizes
+mid-use, and tabs through it. Design for exactly that.
+
+- **The core interaction, stated so it can be tested:** changing the tooth
+  count slider changes the rendered curve — specifically its cusp count, which
+  is `R / gcd(R, r)` and is displayed as a number on screen. A test can assert
+  that function directly, and that the displayed value matches it.
+- **Motion is allowed to take its time.** The slider does not have to snap to
+  a finished figure. Let the gear roll and the particles accumulate at a pace
+  that is legible — the deposition is the explanation, so rushing it to look
+  responsive would trade away the point. Changing the slider mid-roll should
+  re-target smoothly rather than hard-cutting.
+- **A range input gives keyboard access for free.** Use a real
+  `<input type="range">`. Do not replace it with a custom canvas-drag control;
+  drag-only interaction fails the tab-through check outright.
+- **Everything readable must be DOM text, not canvas text.** Cusp count, lap
+  count, tooth count: real elements, so they are selectable, zoomable, and
+  reachable by a screen reader. Canvas-rendered numbers are invisible to all
+  three.
+
+## Viewport contract
+
+Both 1920×1080 and 390×844 are full marking environments.
+
+- **The figure is radially bounded** — it always fits inside a circle of
+  radius `R + 2r`, so the canvas is **square** and scales to fit. There is no
+  wide-versus-tall layout problem to solve; do not invent one.
+- Compute the scale factor from `R + 2r` every time the parameters or the
+  canvas size change, so the figure always fills its box without clipping.
+- Controls sit **below** the canvas at both sizes: one column on the phone,
+  and the same single column centred on desktop. Do not build two layouts.
+- Re-resolve canvas size, DPR and particle count on resize; the marker resizes
+  mid-interaction and a stale backing store shows up immediately.
+
+## Structural invariants (from `spec/invariants.test.ts`)
+
+The starter's own checks fail the build if these slip, and they are easy to
+lose while focused on the canvas:
+
+- one `<h1>`, exactly — not zero, not two
+- a `<nav>` landmark on the page
+- `lang` on `<html>`, a non-empty `<title>`, a viewport meta tag
+- `alt` on every `<img>`
+
+The canvas needs a text alternative too. Give it an `aria-label` describing
+what it shows, and keep the live cusp/lap readouts as DOM text next to it.
+
+## Build order, and what to cut
+
+The deadline is **12:00, Monday 17 August 2026**. Ship stages in this order
+and be willing to stop after any one of them — each stage is a complete,
+submittable piece on its own.
+
+- **S0 — a page that ships.** Vite starter builds, `pnpm check` green, page
+  deployed and live at the Pages URL with the structural invariants met. Do
+  this first, not last: a deployed empty-ish page beats an undeployed good one,
+  and the deploy path is where surprises live.
+- **S1 — the static figure, generated.** Canvas draws the curve from the
+  parametric equation for a fixed tooth count. Correct maths, correct scale,
+  square and fitting at both viewports. No animation yet. **If time runs out,
+  ship here** — this already answers the brief.
+- **S2 — the slider.** Tooth count control wired to the render, cusp and lap
+  counts shown as DOM text, `R / gcd(R, r)` unit-tested. This is the core
+  interaction; the assignment requires it, so treat S2 as the real floor and
+  S1 as the emergency floor.
+- **S3 — the particle deposition.** The rolling gear draws, particles
+  accumulate along the path, trails decay. This is the visual payload and it
+  is where the remaining budget goes — the standards above exist so this stage
+  can be generous without becoming a phone-killer.
+- **S4 — the framing.** The 1:1 coin paradox called out explicitly, and the
+  clock-gear payoff at the end. Cheap in code, high value for the "response to
+  the brief" criterion.
+
+Anything not in this list is out of scope: no multi-page site, no hypocycloid
+(inside-rolling) mode, no Fourier/Lissajous side quests, no audio, no WebGL,
+no library dependency. One idea, carried all the way.
+
+## Evidence, which is 45% of the mark
+
+Larger than the artefact criterion. Build the record as you go — it cannot be
+reconstructed afterwards.
+
+- **Commit at every green check**, with a message saying what changed and why.
+  A trail that grew with the work is the evidence; one dump at the end is not.
+- **`PROCESS.md`: 400–600 words, three or four moments — not more.** Each
+  moment needs room to say what you did _instead of_ the obvious thing, and
+  how you knew the result was right. Cite commits in the required format;
+  `pnpm check:evidence` verifies the citations resolve.
+- **The strongest moments are corrections that landed in this file.** A rule
+  added to CLAUDE.md, a check wired up, an attempt thrown away. Retrying until
+  it passes is routine; changing what the work runs against is the skilled
+  case, and the rubric says so explicitly. When something goes wrong here,
+  fix it in this file first and cite that.
+- **`reflections/assignment-1.md` must exist and be named exactly that.**
+  `pnpm check:evidence` checks the name against the course API, and evidence
+  gates the deploy. It is also what the week 4 retro reads.
+- **The repo is currently private.** It must be public with Pages deployed and
+  the live URL loading before the deadline. Do not leave this to the last
+  minute — CI has to finish too.
+
+## Working rules
+
+- Keep `pnpm dev` running; check the rendered page rather than reasoning about
+  it. The rendered page is the truth.
+- Run `pnpm check` before every push. Never commit a red state.
+- Verify the maths numerically, not by eye: assert `R / gcd(R, r)` against
+  known pairs in a test. A curve can look plausible and be wrong.
+- When a check fails, read the failure before changing anything.
