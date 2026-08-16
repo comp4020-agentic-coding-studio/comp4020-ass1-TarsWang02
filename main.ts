@@ -1,4 +1,12 @@
-import { cuspCount, epicycloidPoint, lapCount, maxRadius, rollingCenter, totalTheta } from "./epicycloid";
+import {
+  cuspCount,
+  epicycloidPoint,
+  lapCount,
+  maxRadius,
+  rollingCenter,
+  rotationCount,
+  totalTheta,
+} from "./epicycloid";
 import { ParticleField } from "./particles";
 
 const RING_TEETH = 24;
@@ -27,12 +35,21 @@ const toothCountEl = document.querySelector<HTMLElement>("#tooth-count");
 const cuspCountEl = document.querySelector<HTMLElement>("#cusp-count");
 const lapCountEl = document.querySelector<HTMLElement>("#lap-count");
 const lapUnitEl = document.querySelector<HTMLElement>("#lap-unit");
+const rotationCountEl = document.querySelector<HTMLElement>("#rotation-count");
 const teethSlider = document.querySelector<HTMLInputElement>("#teeth");
 
-if (canvas && toothCountEl && cuspCountEl && lapCountEl && lapUnitEl && teethSlider) {
+if (
+  canvas &&
+  toothCountEl &&
+  cuspCountEl &&
+  lapCountEl &&
+  lapUnitEl &&
+  rotationCountEl &&
+  teethSlider
+) {
   const ctx = canvas.getContext("2d");
   if (ctx) {
-    init(canvas, ctx, toothCountEl, cuspCountEl, lapCountEl, lapUnitEl, teethSlider);
+    init(canvas, ctx, toothCountEl, cuspCountEl, lapCountEl, lapUnitEl, rotationCountEl, teethSlider);
   }
 }
 
@@ -49,6 +66,7 @@ function init(
   cuspCountEl: HTMLElement,
   lapCountEl: HTMLElement,
   lapUnitEl: HTMLElement,
+  rotationCountEl: HTMLElement,
   teethSlider: HTMLInputElement,
 ): void {
   const R = RING_TEETH;
@@ -67,6 +85,7 @@ function init(
     cuspCountEl.textContent = String(cuspCount(R, r));
     lapCountEl.textContent = String(laps);
     lapUnitEl.textContent = laps === 1 ? "lap" : "laps";
+    rotationCountEl.textContent = String(rotationCount(R, r));
   }
 
   function toCanvas(x: number, y: number, scale: number): [number, number] {

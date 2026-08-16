@@ -62,3 +62,17 @@ a {
 .controls input[type="range"] {
   width: 100%;
 }
+
+.framing {
+  align-self: flex-start;
+  margin-top: 1rem;
+}
+
+.framing h2 {
+  font-size: 1.15rem;
+  margin-bottom: 0.25rem;
+}
+
+.framing p {
+  margin-top: 0;
+}
